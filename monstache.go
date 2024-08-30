@@ -378,6 +378,7 @@ type configOptions struct {
 	MergePatchAttr              string `toml:"merge-patch-attribute"`
 	ElasticMaxConns             int    `toml:"elasticsearch-max-conns"`
 	ElasticRetry                bool   `toml:"elasticsearch-retry"`
+	ElasticHealthCheck          bool   `toml:"elasticsearch-health-check"`
 	ElasticMaxDocs              int    `toml:"elasticsearch-max-docs"`
 	ElasticMaxBytes             int    `toml:"elasticsearch-max-bytes"`
 	ElasticMaxSeconds           int    `toml:"elasticsearch-max-seconds"`
@@ -696,6 +697,7 @@ func (config *configOptions) newElasticClient() (client *elastic.Client, err err
 	var clientOptions []elastic.ClientOptionFunc
 	var httpClient *http.Client
 	clientOptions = append(clientOptions, elastic.SetSniff(false))
+	clientOptions = append(clientOptions, elastic.SetHealthcheck(config.ElasticHealthCheck))
 	if config.needsSecureScheme() {
 		clientOptions = append(clientOptions, elastic.SetScheme("https"))
 	}
@@ -1779,6 +1781,7 @@ func (config *configOptions) parseCommandLineFlags() *configOptions {
 	flag.IntVar(&config.RelateThreads, "relate-threads", 0, "Number of threads dedicated to processing relationships")
 	flag.IntVar(&config.RelateBuffer, "relate-buffer", 0, "Number of relates to queue before skipping and reporting an error")
 	flag.BoolVar(&config.ElasticRetry, "elasticsearch-retry", false, "True to retry failed request to Elasticsearch")
+	flag.BoolVar(&config.ElasticHealthCheck, "elasticsearch-health-check", true, "False to skip health check to Elasticsearch")
 	flag.IntVar(&config.ElasticMaxDocs, "elasticsearch-max-docs", 0, "Number of docs to hold before flushing to Elasticsearch")
 	flag.IntVar(&config.ElasticMaxBytes, "elasticsearch-max-bytes", 0, "Number of bytes to hold before flushing to Elasticsearch")
 	flag.IntVar(&config.ElasticMaxSeconds, "elasticsearch-max-seconds", 0, "Number of seconds before flushing to Elasticsearch")
